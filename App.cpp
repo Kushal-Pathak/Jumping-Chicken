@@ -8,12 +8,12 @@
 #define w 71
 using namespace std;
 
-char buffer[h][w];
+char buffer[h][w], play='y';
 string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
 char chicken[5][6];
-int score;
-float x_off = 5.0f, y_off = h - 6, vy = 0.0f, g = 0.5f;
-int step = 0;
+int score = 0;
+float x_off = 10.0f, y_off = h - 6, vy = 0.0f, g = 0.5f;
+int step = 0, game_over = 0;
 void init_buffer();
 void render();
 void parse_chicken();
@@ -22,23 +22,49 @@ void update();
 void bind_objects();
 void unbind_objects();
 void move_legs();
-void generate_clouds();
 void generate_obstacle();
 void shift_objects();
+void count_score();
+void detect_collision();
+void game_over_message();
+void reset_game();
 
 int main() {
 	srand((unsigned int)time(0));
-	init_buffer();
-	parse_chicken();
-	bind_objects();
-	while (1) {
-		render();
-		control();
-		move_legs();
-		update();
-		Sleep(50);
+	while (play == 'y') {
+		reset_game();
+		while (!game_over) {
+			render();
+			control();
+			move_legs();
+			detect_collision();
+			update();
+			Sleep(50);
+		}
+		game_over_message();
 	}
 	return 0;
+}
+
+void detect_collision() {
+	int ty, tx;
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 6; j++) {
+			tx = (int)x_off + j; ty = (int)y_off + i;
+			if (buffer[ty][tx] == block) {
+				game_over = 1;
+				Beep(300, 1000);
+				return;
+			}
+		}
+	}
+}
+
+void count_score() {
+	if (buffer[h - 2][8] == block) {
+		score++;
+		Beep(500, 70);
+	}
 }
 
 void generate_obstacle() {
@@ -59,12 +85,6 @@ void shift_objects() {
 			if (buffer[i][0] == block) buffer[i][0] = ' ';
 		}
 	}
-}
-
-void generate_clouds() {
-	int ty = rand() % (h - 9);
-	int tx = rand() % w;
-	buffer[ty][w-1] = cloud;
 }
 
 void move_legs() {
@@ -91,15 +111,14 @@ void control() {
 }
 
 void update() {
+	count_score();
 	step++;
 	unbind_objects();
 	if (y_off == h - 11) vy = 1.0f;
 	y_off += vy;
-	cout << "\ny_off: " << y_off << " vy: " << vy;
 	bind_objects();
 	shift_objects();
 	generate_obstacle();
-	//generate_clouds();
 }
 
 void bind_objects() {
@@ -118,6 +137,7 @@ void unbind_objects() {
 		for (int j = 0; j < 6; j++) {
 			int tx = j + (int)x_off, ty = i + (int)y_off;
 			if (tx > -1 && tx<w && ty>-1 && ty < h) {
+				if (buffer[ty][tx] == block) game_over = 1;
 				buffer[ty][tx] = ' ';
 			}
 		}
@@ -132,7 +152,7 @@ void render() {
 		}
 		cout << endl;
 	}
-	cout << "\t  Score: " << score;
+	cout << "\t  Score: " << score << endl;
 }
 void init_buffer() {
 	for (int i = 0; i < h; i++) {
@@ -153,4 +173,19 @@ void parse_chicken() {
 			else chicken[i][j] = chicken_body[index];
 		}
 	}
+}
+void game_over_message() {
+	play = 'n';
+	cout << "Game Over!" << endl << "Play again (y): ";
+	cin >> play;
+}
+
+void reset_game() {
+	game_over = 0;
+	score = 0;
+	step = 0;
+	play = 'y';
+	init_buffer();
+	parse_chicken();
+	bind_objects();
 }
