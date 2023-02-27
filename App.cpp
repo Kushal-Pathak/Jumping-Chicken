@@ -1,15 +1,15 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
-#define h 20
-#define w 65
+#define h 15
+#define w 100
 using namespace std;
 
 char buffer[h][w];
 string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
 char chicken[5][6];
 int score;
-int x_off = 10, y_off = 10;
+int x_off = 10, y_off = 9;
 void init_buffer();
 void render();
 void parse_chicken();
@@ -34,6 +34,7 @@ void init_buffer() {
 	for (int i = 0; i < h; i++) {
 		for (int j = 0; j < w; j++) {
 			buffer[i][j] = ' ';
+			buffer[h - 1][j] = '_';
 		}
 	}
 	cout << endl;
@@ -46,7 +47,6 @@ void parse_chicken() {
 			index = j + 6 * i;
 			if (chicken_body[index] == '.')chicken[i][j] = ' ';
 			else chicken[i][j] = chicken_body[index];
-			
 			buffer[i + y_off][j + x_off] = chicken[i][j];
 		}
 	}
