@@ -36,11 +36,16 @@ int main() {
 
 void move_legs() {
 	int tx = 4, ty = 4;
+	// legs move only when in the ground
 	if (y_off == h - 6) {
 		if (chicken[ty][tx] == '\\') chicken[ty][tx] = '>';
 		else chicken[ty][tx] = '\\';
 		if (chicken[ty][tx - 1] == '/') chicken[ty][tx - 1] = '|';
 		else chicken[ty][tx - 1] = '/';
+	}
+	else {
+		chicken[ty][tx] = '>';
+		chicken[ty][tx - 1] = '|';
 	}
 }
 
