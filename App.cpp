@@ -1,16 +1,19 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
+#include <cmath>
 #define block (char)254
-#define h 30
-#define w 130
+#define cloud 'c'
+#define h 15
+#define w 71
 using namespace std;
 
 char buffer[h][w];
 string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
 char chicken[5][6];
 int score;
-float x_off = 20.0f, y_off = h - 6, vy = 0.0f, g = 0.5f;
+float x_off = 5.0f, y_off = h - 6, vy = 0.0f, g = 0.5f;
+int step = 0;
 void init_buffer();
 void render();
 void parse_chicken();
@@ -19,8 +22,12 @@ void update();
 void bind_objects();
 void unbind_objects();
 void move_legs();
+void generate_clouds();
+void generate_obstacle();
+void shift_objects();
 
 int main() {
+	srand((unsigned int)time(0));
 	init_buffer();
 	parse_chicken();
 	bind_objects();
@@ -29,9 +36,35 @@ int main() {
 		control();
 		move_legs();
 		update();
-		Sleep(100);
+		Sleep(50);
 	}
 	return 0;
+}
+
+void generate_obstacle() {
+	if (step % 35 == 0) {
+		int size = 1 + rand() % 3;
+		for (int i = 1; i <= size; i++) {
+			buffer[h - 1 - i][w - 1] = block;
+		}
+	}
+}
+void shift_objects() {
+	for (int i = 0; i < h; i++) {
+		for (int j = 0; j < w - 2; j++) {
+			if (buffer[i][j + 2] == block) {
+				buffer[i][j + 2] = ' ';
+				buffer[i][j] = block;
+			}
+			if (buffer[i][0] == block) buffer[i][0] = ' ';
+		}
+	}
+}
+
+void generate_clouds() {
+	int ty = rand() % (h - 9);
+	int tx = rand() % w;
+	buffer[ty][w-1] = cloud;
 }
 
 void move_legs() {
@@ -58,11 +91,15 @@ void control() {
 }
 
 void update() {
+	step++;
 	unbind_objects();
-	if (y_off == h - 9) vy = 1.0f;
+	if (y_off == h - 11) vy = 1.0f;
 	y_off += vy;
 	cout << "\ny_off: " << y_off << " vy: " << vy;
 	bind_objects();
+	shift_objects();
+	generate_obstacle();
+	//generate_clouds();
 }
 
 void bind_objects() {
@@ -106,8 +143,6 @@ void init_buffer() {
 	}
 	cout << endl;
 }
-
-
 
 void parse_chicken() {
 	int index = 0;
