@@ -5,15 +5,18 @@
 #define block (char)254
 #define cloud 'c'
 #define h 15
-#define w 71
+#define w 35
+#define chicken_height 5
+#define chicken_width 6
 using namespace std;
 
-char buffer[h][w], play='y';
 string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
-char chicken[5][6];
-int score = 0;
-float x_off = 10.0f, y_off = h - 6, vy = 0.0f, g = 0.5f;
-int step = 0, game_over = 0;
+char buffer[h][w], play='y';
+char chicken[chicken_height][chicken_width];
+
+float x_off = 10.0f, y_off = h - 6, vy = 0.0f;
+int step = 0, game_over = 0, score = 0;
+
 void init_buffer();
 void render();
 void parse_chicken();
@@ -48,13 +51,12 @@ int main() {
 
 void detect_collision() {
 	int ty, tx;
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 6; j++) {
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
 			tx = (int)x_off + j; ty = (int)y_off + i;
 			if (buffer[ty][tx] == block) {
 				game_over = 1;
 				Beep(300, 1000);
-				return;
 			}
 		}
 	}
@@ -71,7 +73,7 @@ void generate_obstacle() {
 	if (step % 35 == 0) {
 		int size = 1 + rand() % 3;
 		for (int i = 1; i <= size; i++) {
-			buffer[h - 1 - i][w - 1] = block;
+			buffer[h - 1 - i][w-1] = block;
 		}
 	}
 }
@@ -108,13 +110,13 @@ void control() {
 		char c = _getch();
 		if (c == 'w') vy = -1.0f;
 	}
+	if (y_off == h - 11) vy = 1.0f;
 }
 
 void update() {
-	count_score();
 	step++;
+	count_score();
 	unbind_objects();
-	if (y_off == h - 11) vy = 1.0f;
 	y_off += vy;
 	bind_objects();
 	shift_objects();
@@ -122,10 +124,10 @@ void update() {
 }
 
 void bind_objects() {
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 6; j++) {
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
 			int tx = j + (int)x_off, ty = i + (int)y_off;
-			if (tx > -1 && tx<w && ty>-1 && ty < h) {
+			if (tx > -1 && tx < w && ty > -1 && ty < h) {
 				buffer[ty][tx] = chicken[i][j];
 			}
 		}
@@ -133,11 +135,11 @@ void bind_objects() {
 }
 
 void unbind_objects() {
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 6; j++) {
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
 			int tx = j + (int)x_off, ty = i + (int)y_off;
-			if (tx > -1 && tx<w && ty>-1 && ty < h) {
-				if (buffer[ty][tx] == block) game_over = 1;
+			if (tx > -1 && tx < w && ty > -1 && ty < h) {
+				//if (buffer[ty][tx] == block) game_over = 1;
 				buffer[ty][tx] = ' ';
 			}
 		}
@@ -152,7 +154,7 @@ void render() {
 		}
 		cout << endl;
 	}
-	cout << "\t  Score: " << score << endl;
+	cout << "\t\t\t\tScore: " << score << endl;
 }
 void init_buffer() {
 	for (int i = 0; i < h; i++) {
@@ -166,8 +168,8 @@ void init_buffer() {
 
 void parse_chicken() {
 	int index = 0;
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 6; j++) {
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
 			index = j + 6 * i;
 			if (chicken_body[index] == '.') chicken[i][j] = ' ';
 			else chicken[i][j] = chicken_body[index];
@@ -185,6 +187,8 @@ void reset_game() {
 	score = 0;
 	step = 0;
 	play = 'y';
+	y_off = h - 6;
+	vy = 0;
 	init_buffer();
 	parse_chicken();
 	bind_objects();
