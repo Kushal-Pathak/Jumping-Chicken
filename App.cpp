@@ -14,7 +14,7 @@ char buffer[h][w], play='y';
 char chicken[chicken_height][chicken_width];
 
 float x_off = 10.0f, y_off = h - 6, vy = 0.0f, speed = 1.5f;
-int step = 0, game_over = 0, score = 0, entry_block = 0, exit_block = 0, block_ticks = 0;
+int step = 0, game_over = 0, score = 0;
 
 void init_buffer();
 void render();
@@ -23,8 +23,6 @@ void control();
 void update();
 void bind_chicken();
 void unbind_chicken();
-void bind_obstacles();
-void unbind_obstacles();
 void move_legs();
 void generate_obstacle();
 void shift_objects();
@@ -32,19 +30,18 @@ void count_score();
 void detect_collision();
 void game_over_message();
 void reset_game();
-void update_obstacles();
 
-/////////////////////////////////////////////////////////
 int main() {
 	srand((unsigned int)time(0));
+	cout << "w key to jump" << endl << "Press any key to start the game . . . ";
+	play = _getch();
+	play = 'y';
 	while (play == 'y') {
 		reset_game();
 		while (!game_over) {
 			render();
-			detect_collision();
 			control();
 			move_legs();
-			//detect_collision();
 			update();
 			Sleep(50);
 		}
@@ -52,17 +49,7 @@ int main() {
 	}
 	return 0;
 }
-////////////////////////////////////////////////////////
 
-void bind_obstacles() {
-	
-}
-void unbind_obstacles() {
-	
-}
-void update_obstacles() {
-
-}
 void generate_obstacle() {
 	if (step % 35 == 0) {
 		int height = 2 + rand() % 2;
@@ -76,9 +63,9 @@ void detect_collision() {
 	for (int i = 0; i < chicken_height; i++) {
 		for (int j = 0; j < chicken_width; j++) {
 			tx = (int)x_off + j; ty = (int)y_off + i;
-			if (buffer[ty][tx] == block && chicken[i][j] != ' ') {
+			if ((buffer[ty][tx] == block || buffer[ty+1][tx] == block) && chicken[i][j] != ' ') {
 				game_over = 1;
-				Beep(300, 1000);
+				//Beep(300, 1000);
 				return;
 			}
 		}
@@ -89,11 +76,10 @@ void update() {
 	generate_obstacle();
 	count_score();
 	unbind_chicken();
-	//detect_collision();
+	detect_collision();
 	y_off += vy;
 	bind_chicken();
 	shift_objects();
-	//detect_collision();
 	step++;
 }
 
@@ -104,6 +90,18 @@ void bind_chicken() {
 			if (tx > -1 && tx < w && ty > -1 && ty < h) {
 				if (chicken[i][j] != ' ') {
 					buffer[ty][tx] = chicken[i][j];
+				}
+			}
+		}
+	}
+}
+void unbind_chicken() {
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
+			int tx = j + (int)x_off, ty = i + (int)y_off;
+			if (tx > -1 && tx < w && ty > -1 && ty < h) {
+				if (buffer[ty][tx] != block) {
+					buffer[ty][tx] = ' ';
 				}
 			}
 		}
@@ -153,19 +151,6 @@ void control() {
 	if (y_off == h - 11) vy = 1.0f;
 }
 
-void unbind_chicken() {
-	for (int i = 0; i < chicken_height; i++) {
-		for (int j = 0; j < chicken_width; j++) {
-			int tx = j + (int)x_off, ty = i + (int)y_off;
-			if (tx > -1 && tx < w && ty > -1 && ty < h) {
-				if (buffer[ty][tx] != ' ') {
-					buffer[ty][tx] = ' ';
-				}
-			}
-		}
-	}
-}
-
 void render() {
 	system("cls");
 	for (int i = 0; i < h; i++) {
@@ -197,8 +182,12 @@ void parse_chicken() {
 	}
 }
 void game_over_message() {
+	unbind_chicken();
+	bind_chicken();
+	render();
+	Beep(300, 500);
 	play = 'n';
-	cout << "Game Over!" << endl << "Play again (y): ";
+	cout << "\t\t\t       Game Over!" << endl << "\t\t\t   Play again (y): ";
 	cin >> play;
 }
 
@@ -212,7 +201,4 @@ void reset_game() {
 	init_buffer();
 	parse_chicken();
 	bind_chicken();
-	entry_block = 0;
-	block_ticks = 0;
-	exit_block = 0;
 }
