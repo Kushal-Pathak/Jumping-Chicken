@@ -13,8 +13,8 @@ string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
 char buffer[h][w], play='y';
 char chicken[chicken_height][chicken_width];
 
-float x_off = 10.0f, y_off = h - 6, vy = 0.0f;
-int step = 0, game_over = 0, score = 0;
+float x_off = 10.0f, y_off = h - 6, vy = 0.0f, speed = 1.5f;
+int step = 0, game_over = 0, score = 0, entry_block = 0, exit_block = 0, block_ticks = 0;
 
 void init_buffer();
 void render();
@@ -41,6 +41,7 @@ int main() {
 		reset_game();
 		while (!game_over) {
 			render();
+			detect_collision();
 			control();
 			move_legs();
 			//detect_collision();
@@ -64,23 +65,35 @@ void update_obstacles() {
 }
 void generate_obstacle() {
 	if (step % 35 == 0) {
-		int height = 1 + rand() % 3;
+		int height = 2 + rand() % 2;
 		for (int i = 1; i <= height; i++) {
 			buffer[h - 1 - i][w - 1] = block;
 		}
 	}
 }
 void detect_collision() {
-	
+	int tx, ty;
+	for (int i = 0; i < chicken_height; i++) {
+		for (int j = 0; j < chicken_width; j++) {
+			tx = (int)x_off + j; ty = (int)y_off + i;
+			if (buffer[ty][tx] == block && chicken[i][j] != ' ') {
+				game_over = 1;
+				Beep(300, 1000);
+				return;
+			}
+		}
+	}
 }
 
 void update() {
 	generate_obstacle();
-	shift_objects();
 	count_score();
 	unbind_chicken();
+	//detect_collision();
 	y_off += vy;
 	bind_chicken();
+	shift_objects();
+	//detect_collision();
 	step++;
 }
 
@@ -89,7 +102,9 @@ void bind_chicken() {
 		for (int j = 0; j < chicken_width; j++) {
 			int tx = j + (int)x_off, ty = i + (int)y_off;
 			if (tx > -1 && tx < w && ty > -1 && ty < h) {
-				buffer[ty][tx] = chicken[i][j];
+				if (chicken[i][j] != ' ') {
+					buffer[ty][tx] = chicken[i][j];
+				}
 			}
 		}
 	}
@@ -143,7 +158,9 @@ void unbind_chicken() {
 		for (int j = 0; j < chicken_width; j++) {
 			int tx = j + (int)x_off, ty = i + (int)y_off;
 			if (tx > -1 && tx < w && ty > -1 && ty < h) {
-				buffer[ty][tx] = ' ';
+				if (buffer[ty][tx] != ' ') {
+					buffer[ty][tx] = ' ';
+				}
 			}
 		}
 	}
@@ -195,4 +212,7 @@ void reset_game() {
 	init_buffer();
 	parse_chicken();
 	bind_chicken();
+	entry_block = 0;
+	block_ticks = 0;
+	exit_block = 0;
 }
