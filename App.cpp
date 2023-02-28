@@ -4,7 +4,7 @@
 #include <cmath>
 #define block (char)254
 #define h 15
-#define w 51
+#define w 81
 #define chicken_height 5
 #define chicken_width 6
 using namespace std;
@@ -59,16 +59,29 @@ void bind_obstacles() {
 void unbind_obstacles() {
 	
 }
+void update_obstacles() {
+
+}
+void generate_obstacle() {
+	if (step % 35 == 0) {
+		int height = 1 + rand() % 3;
+		for (int i = 1; i <= height; i++) {
+			buffer[h - 1 - i][w - 1] = block;
+		}
+	}
+}
 void detect_collision() {
 	
 }
 
 void update() {
-	step++;
+	generate_obstacle();
+	shift_objects();
 	count_score();
 	unbind_chicken();
 	y_off += vy;
 	bind_chicken();
+	step++;
 }
 
 void bind_chicken() {
@@ -89,9 +102,6 @@ void count_score() {
 	}
 }
 
-void generate_obstacle() {
-	
-	}
 void shift_objects() {
 	for (int i = 0; i < h; i++) {
 		for (int j = 0; j < w - 2; j++) {
