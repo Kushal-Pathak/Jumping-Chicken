@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <windows.h>
 #include <cmath>
+#include <ctime>
 #define block (char)254
 #define h 12
 #define w 101
@@ -51,6 +52,7 @@ int main() {
 }
 
 void generate_obstacle() {
+
 	if (step % 35 == 0) {
 		int height = 2 + rand() % (max_obstacle_height - 1);
 		for (int i = 1; i <= height; i++) {
@@ -190,7 +192,7 @@ void game_over_message() {
 	render();
 	Beep(300, 500);
 	play = 'n';
-	cout << "\t\t\t       Game Over!" << endl << "\t\t\t   Play again (y): ";
+	cout << "\t\t\t       Game Over!" << endl << "\t\t\t    Play again (y): ";
 	cin >> play;
 }
 
