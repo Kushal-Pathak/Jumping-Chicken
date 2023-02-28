@@ -3,8 +3,8 @@
 #include <windows.h>
 #include <cmath>
 #define block (char)254
-#define h 15
-#define w 81
+#define h 12
+#define w 101
 #define chicken_height 5
 #define chicken_width 6
 using namespace std;
@@ -14,7 +14,7 @@ char buffer[h][w], play='y';
 char chicken[chicken_height][chicken_width];
 
 float x_off = 10.0f, y_off = h - 6, vy = 0.0f, speed = 1.5f;
-int step = 0, game_over = 0, score = 0;
+int step = 0, game_over = 0, score = 0, max_obstacle_height = 4;
 
 void init_buffer();
 void render();
@@ -52,7 +52,7 @@ int main() {
 
 void generate_obstacle() {
 	if (step % 35 == 0) {
-		int height = 2 + rand() % 2;
+		int height = 2 + rand() % (max_obstacle_height - 1);
 		for (int i = 1; i <= height; i++) {
 			buffer[h - 1 - i][w - 1] = block;
 		}
@@ -183,6 +183,9 @@ void parse_chicken() {
 }
 void game_over_message() {
 	unbind_chicken();
+	chicken[4][3] = '!';
+	chicken[4][4] = '!';
+	chicken[1][4] = '@';
 	bind_chicken();
 	render();
 	Beep(300, 500);
