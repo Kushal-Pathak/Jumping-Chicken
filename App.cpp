@@ -3,34 +3,40 @@
 #include <windows.h>
 #include <cmath>
 #include <ctime>
-#define block (char)254
-#define h 12
-#define w 101
-#define chicken_height 5
-#define chicken_width 6
+#define block (char)254  // block used for obstacle
+#define h 12  // screen height
+#define w 101 // screen width
+#define chicken_height 5 // chicken height
+#define chicken_width 6 // chicken width
 using namespace std;
 
-string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\.";
-char buffer[h][w], play='y';
-char chicken[chicken_height][chicken_width];
+string chicken_body = "...\\\\....(o>\\\\_//).\\_/_).../\\."; // chicken body in linear fashion
+char buffer[h][w], play='y'; // display buffer
+char chicken[chicken_height][chicken_width]; // chicken 2d array
 
-float x_off = 10.0f, y_off = h - 6, vy = 0.0f, speed = 1.5f;
+// x_off and y_off give the offset position(top-left) of chicken
+// vy is velocity of chicken in horizontal direction
+// step counts the number of game loops
+// game_over keeps track of game over or not
+// score variable used to store current score
+// max_obstacle_height is the maximum possible height of obstacle to be generated (Note: 1 is min height)
+float x_off = 10.0f, y_off = h - 6, vy = 0.0f;
 int step = 0, game_over = 0, score = 0, max_obstacle_height = 4;
 
-void init_buffer();
-void render();
-void parse_chicken();
-void control();
-void update();
-void bind_chicken();
-void unbind_chicken();
-void move_legs();
-void generate_obstacle();
-void shift_objects();
-void count_score();
-void detect_collision();
-void game_over_message();
-void reset_game();
+void init_buffer(); // to initialize the buffer matrix with empty space
+void render(); // to display the pixels stored in buffer
+void parse_chicken(); // to parse the chicken_body (linear data) into 2d pixels
+void control(); // to check the user input for controlling the chicken
+void update(); // to update the game state
+void bind_chicken(); // to bind the 2d chicken data into the 2d buffer
+void unbind_chicken(); // to unbind the chicken data from the buffer
+void move_legs(); // to give the illusion of chicken running
+void generate_obstacle(); // to generate a random height(1 to max_obstacle_height) at regular interval
+void shift_objects(); // to shift the obstacles left (towards the chicken)
+void count_score(); // to count score if obstacle is avoided by the chicken
+void detect_collision(); // to check if chicken has collided with obstacle
+void game_over_message(); // this function runs when game is over
+void reset_game(); // resets the game paratemer
 
 int main() {
 	srand((unsigned int)time(0));
